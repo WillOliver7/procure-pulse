@@ -10,6 +10,7 @@ class ProcurementAnalyticsWorker
       status: "processing",
       error_message: nil
     )
+    analysis_run.broadcast_status
 
     results = ProcurementAnalytics.new.call
 
@@ -17,12 +18,14 @@ class ProcurementAnalyticsWorker
       status: "completed",
       results: results.as_json
     )
+    analysis_run.broadcast_status
   rescue StandardError => e
     if analysis_run
       analysis_run.update!(
         status: "failed",
         error_message: e.message
       )
+      analysis_run.broadcast_status
     end
 
     raise
