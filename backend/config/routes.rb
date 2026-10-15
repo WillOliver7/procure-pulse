@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :purchase_orders, only: [:index, :show]
+      get "analytics", to: "analytics#show"
     end
   end
 end
