@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import {
   apiRequest,
   clearToken,
+  getToken,
   loginRequest,
   logoutRequest,
   signupRequest,
@@ -10,23 +11,33 @@ import { AuthContext, type AuthUser } from "./AuthContext";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(
-    () => Boolean(sessionStorage.getItem("procure-pulse-token")),
-  );
+  const [loading, setLoading] = useState(() => Boolean(getToken()));
 
+  
   useEffect(() => {
-    if (!sessionStorage.getItem("procure-pulse-token")) {
-      return;
-    }
+    if (!getToken()) return;
 
-    apiRequest<AuthUser>("/me")
-      .then(setUser)
-      .catch(() => {
-        clearToken();
-        setUser(null);
+    let active = true;
+
+    apiRequest<{ user: AuthUser }>("/me")
+      .then((result) => {
+        if (active) setUser(result.user);
       })
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (active) {
+          clearToken();
+          setUser(null);
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
+
 
   async function login(email: string, password: string) {
     const result = await loginRequest(email, password);
