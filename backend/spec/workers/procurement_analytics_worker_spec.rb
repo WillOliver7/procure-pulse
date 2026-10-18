@@ -26,7 +26,17 @@ RSpec.describe ProcurementAnalyticsWorker do
         allow(analytics).to receive(:call).and_return(results)
       end
 
-      # Keep the existing examples here.
+      it "marks the run as completed and stores the results" do
+        expect(analysis_run).to receive(:update!)
+          .with(status: "processing", error_message: nil)
+        expect(analysis_run).to receive(:update!)
+          .with(status: "completed", results: results.as_json)
+
+        worker.perform(analysis_run.id)
+
+        expect(analytics).to have_received(:call)
+        expect(analysis_run).to have_received(:broadcast_status).twice
+      end
     end
 
     context "when analytics fails" do
@@ -43,7 +53,18 @@ RSpec.describe ProcurementAnalyticsWorker do
           .and_raise(StandardError, "Analytics service failed")
       end
 
-      # Keep the existing example here.
+      it "marks the run as failed and stores the error message" do
+        expect(analysis_run).to receive(:update!)
+          .with(status: "processing", error_message: nil)
+        expect(analysis_run).to receive(:update!)
+          .with(status: "failed", error_message: "Analytics service failed")
+
+        expect {
+          worker.perform(analysis_run.id)
+        }.to raise_error(StandardError, "Analytics service failed")
+
+        expect(analysis_run).to have_received(:broadcast_status).twice
+      end
     end
 
     context "when the analysis run does not exist" do
