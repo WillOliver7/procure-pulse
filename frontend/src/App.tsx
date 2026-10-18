@@ -1,22 +1,12 @@
 import { useEffect, useState } from "react";
 import { createConsumer } from "@rails/actioncable";
+import AppHeader from "./components/layout/AppHeader";
+import AnalysisPanel from "./features/analysis/AnalysisPanel";
+import type { AnalysisRun } from "./features/analysis/analysis.types";
 import "./App.css";
 
 const API_URL = "http://localhost:3000/api/v1";
 const CABLE_URL = "ws://localhost:3000/cable";
-
-type AnalysisRun = {
-  id: number;
-  status: "pending" | "processing" | "completed" | "failed";
-  results?: {
-    currency?: string;
-    order_count?: number;
-    total_spend_usd?: string;
-    spend_by_supplier?: { name: string; spend_usd: string }[];
-    spend_by_category?: { name: string; spend_usd: string }[];
-  };
-  error_message?: string | null;
-};
 
 function App() {
   const [analysis, setAnalysis] = useState<AnalysisRun | null>(null);
@@ -37,8 +27,6 @@ function App() {
       }
     );
 
-    // Fetch the persisted state too, in case the job finished
-    // before the WebSocket subscription was established.
     fetch(`${API_URL}/analysis_runs/${analysis.id}`)
       .then((response) => {
         if (!response.ok) throw new Error("Could not fetch analysis");
@@ -76,11 +64,7 @@ function App() {
 
   return (
     <main className="dashboard">
-      <header>
-        <p className="eyebrow">PROCUREMENT INTELLIGENCE</p>
-        <h1>ProcurePulse</h1>
-        <p>Understand supplier spending and identify opportunities.</p>
-      </header>
+      <AppHeader />
 
       <button onClick={startAnalysis} disabled={starting}>
         {starting ? "Starting..." : "Run procurement analysis"}
@@ -88,52 +72,7 @@ function App() {
 
       {error && <p className="error">{error}</p>}
 
-      {analysis && (
-        <section className="panel">
-          <h2>Analysis #{analysis.id}</h2>
-          <p>
-            Status: <strong>{analysis.status}</strong>
-          </p>
-
-          {analysis.status === "pending" && <p>Waiting for a worker...</p>}
-          {analysis.status === "processing" && <p>Calculating spending...</p>}
-          {analysis.status === "failed" && (
-            <p className="error">{analysis.error_message || "Analysis failed."}</p>
-          )}
-
-          {analysis.status === "completed" && analysis.results && (
-            <>
-              <div className="metric">
-                <span>Total spend</span>
-                <strong>
-                  {analysis.results.currency}{" "}
-                  {analysis.results.total_spend_usd}
-                </strong>
-              </div>
-
-              <p>Purchase orders: {analysis.results.order_count}</p>
-
-              <h3>Spending by supplier</h3>
-              <ul>
-                {analysis.results.spend_by_supplier?.map((supplier) => (
-                  <li key={supplier.name}>
-                    {supplier.name} — ${supplier.spend_usd}
-                  </li>
-                ))}
-              </ul>
-
-              <h3>Spending by category</h3>
-              <ul>
-                {analysis.results.spend_by_category?.map((category) => (
-                  <li key={category.name}>
-                    {category.name} — ${category.spend_usd}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </section>
-      )}
+      {analysis && <AnalysisPanel analysis={analysis} />}
     </main>
   );
 }
