@@ -1,6 +1,8 @@
 module Api
   module V1
     class AnalysisRunsController < ApplicationController
+      before_action :authenticate_user!
+
       def create
         analysis_run = AnalysisRun.create!
 

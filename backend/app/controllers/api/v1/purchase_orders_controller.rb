@@ -1,6 +1,8 @@
 module Api
   module V1
     class PurchaseOrdersController < ApplicationController
+      before_action :authenticate_user!
+
       def index
         orders = PurchaseOrder
           .includes(:supplier, :purchase_order_items)
