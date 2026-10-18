@@ -25,6 +25,61 @@ body {
   }
 }
 
+.dashboard-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.user-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: #566174;
+  font-size: 0.9rem;
+}
+
+.secondary-button {
+  margin: 0;
+  padding: 8px 12px;
+  background: #e7eaf2;
+  color: #172033;
+}
+
+.auth-card {
+  max-width: 480px;
+  margin-top: 32px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #d5dbe6;
+  border-radius: 8px;
+  background: white;
+  color: #172033;
+}
+
+.auth-form button[type="submit"] {
+  align-self: flex-start;
+}
+
+.text-button {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: #3949ab;
+}
+
 .eyebrow {
   color: #5668cf;
   font-size: 0.75rem;
