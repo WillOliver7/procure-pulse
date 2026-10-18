@@ -10,7 +10,8 @@ import { apiRequest } from "./lib/api";
 import "./App.css";
 
 const CABLE_URL =
-  import.meta.env.VITE_CABLE_URL ?? "ws://localhost:3000/cable";
+  import.meta.env.VITE_CABLE_URL ??
+  `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/cable`;
 
 function Dashboard() {
   const { user, logout } = useAuth();
