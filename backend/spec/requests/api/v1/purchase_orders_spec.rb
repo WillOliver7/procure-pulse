@@ -1,9 +1,10 @@
-
 require "rails_helper"
 
 RSpec.describe "API V1 Purchase Orders", type: :request do
   describe "GET /api/v1/purchase_orders" do
     it "returns purchase orders with suppliers and items" do
+      auth = create_authenticated_user
+
       supplier = Supplier.create!(
         name: "Acme Supplies",
         country: "Brazil"
@@ -25,7 +26,7 @@ RSpec.describe "API V1 Purchase Orders", type: :request do
         unit_price: 25.50
       )
 
-      get "/api/v1/purchase_orders"
+      get "/api/v1/purchase_orders", headers: auth[:headers]
 
       expect(response).to have_http_status(:ok)
 

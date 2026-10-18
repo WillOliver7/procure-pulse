@@ -3,8 +3,10 @@ require "rails_helper"
 RSpec.describe "API V1 Analysis Runs", type: :request do
   describe "POST /api/v1/analysis_runs" do
     it "creates an analysis and enqueues a job" do
+      auth = create_authenticated_user
+
       expect {
-        post "/api/v1/analysis_runs"
+        post "/api/v1/analysis_runs", headers: auth[:headers]
       }.to change(AnalysisRun, :count).by(1)
 
       expect(response).to have_http_status(:accepted)
@@ -18,12 +20,14 @@ RSpec.describe "API V1 Analysis Runs", type: :request do
 
   describe "GET /api/v1/analysis_runs/:id" do
     it "returns the analysis status and results" do
+      auth = create_authenticated_user
+
       run = AnalysisRun.create!(
         status: "completed",
         results: { currency: "USD", order_count: 2 }
       )
 
-      get "/api/v1/analysis_runs/#{run.id}"
+      get "/api/v1/analysis_runs/#{run.id}", headers: auth[:headers]
 
       expect(response).to have_http_status(:ok)
 

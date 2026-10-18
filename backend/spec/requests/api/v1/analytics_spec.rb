@@ -1,9 +1,10 @@
-
 require "rails_helper"
 
 RSpec.describe "API V1 Analytics", type: :request do
   describe "GET /api/v1/analytics" do
     it "returns procurement analytics as JSON" do
+      auth = create_authenticated_user
+
       analytics = {
         currency: "USD",
         order_count: 1,
@@ -17,10 +18,9 @@ RSpec.describe "API V1 Analytics", type: :request do
       }
 
       service = instance_double(ProcurementAnalytics, call: analytics)
-
       allow(ProcurementAnalytics).to receive(:new).and_return(service)
 
-      get "/api/v1/analytics"
+      get "/api/v1/analytics", headers: auth[:headers]
 
       expect(response).to have_http_status(:ok)
 
